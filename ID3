@@ -1,0 +1,18 @@
+import math
+
+#计算香农熵
+def calcShannonEnt(dataSet):
+    shannonEnt = 0.0
+    labelsCount = {}
+    labels = [example[-1] for example in dataSet]
+    for key in labels:
+        if key not in labelsCount:
+            labelsCount[key] = 0.0
+        labelsCount[key] += 1.0
+        numItems = float(len(labelsCount))
+    print(numItems)
+    for k in labelsCount:
+        prob = labelsCount[k] / numItems
+    shannonEnt -= prob * math.log(prob, 2)
+    return shannonEnt
+
