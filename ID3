@@ -6,13 +6,67 @@ def calcShannonEnt(dataSet):
     labelsCount = {}
     labels = [example[-1] for example in dataSet]
     for key in labels:
-        if key not in labelsCount:
+        if key not in labelsCount.keys():
             labelsCount[key] = 0.0
         labelsCount[key] += 1.0
-        numItems = float(len(labelsCount))
-    print(numItems)
+    numItems = float(len(dataSet))
     for k in labelsCount:
-        prob = labelsCount[k] / numItems
-    shannonEnt -= prob * math.log(prob, 2)
+        prob = float(labelsCount[k]) / numItems
+        shannonEnt -= prob * math.log(prob, 2)
     return shannonEnt
+#按照给定特征划分数据集
+def splitDataSet(dataSet, axis, value):
+    retDataSet = []
+    for featVec in dataSet:
+        if featVec[axis] == value:
+            reducedFeatVec = featVec[:axis]
+            reducedFeatVec.extend(featVec[axis+1:])
+            retDataSet.append(reducedFeatVec)
+    return retDataSet
 
+
+
+def chooseBestFeatureToSplit(dataSet):
+    numFeatures = len(dataSet[0]) - 1
+    print("numF : ", numFeatures)
+    baseEntropy = calcShannonEnt(dataSet)
+    print("baseEntropy : ", baseEntropy)
+    bestInfoGain = 0.0
+    print("bestInfoGain : ", bestInfoGain)
+    bestFeature = -1
+    for i in range(numFeatures):
+        featList = [example[i] for example in dataSet]
+        uniqueVals = set(featList)
+        print("uniqueVals : ", uniqueVals)
+        newEntropy = 0.0
+        for value in uniqueVals:
+            print("value : ",value, "; i : ", i)
+            subDataSet = splitDataSet(dataSet, i, value)
+            print(dataSet)
+            print(subDataSet)
+            prob = float(len(subDataSet)) / float(len(dataSet))
+            print("len of subDataSet : ", len(subDataSet))
+            print("len of dataSet : ", len(dataSet))
+            newEntropy += prob * calcShannonEnt(subDataSet)
+        infoGain = baseEntropy - newEntropy
+        print("infoGain : ", infoGain)
+        if infoGain > bestInfoGain:
+            bestInfoGain = infoGain
+            bestFeature = i
+    return bestFeature
+
+
+
+def createDataSet():
+    dataSet = [[1, 1, 'yes'],
+               [1, 1, 'yes'],
+               [1, 0, 'no'],
+               [0, 1, 'no'],
+               [0, 1, 'no']]
+    labels = ['no surfacing','flippers']
+    return dataSet, labels
+
+myData, labels = createDataSet()
+
+p = chooseBestFeatureToSplit(myData)
+print("p : ", p)
