@@ -1,0 +1,114 @@
+
+import urllib.request
+def createC1(dataSet):
+    C1 = []
+    for tra in dataSet:
+        for item in tra:
+            if not [item] in C1:
+                C1.append([item])
+    C1.sort()
+    return list(map(frozenset, C1))
+
+
+def scanD(D, Ck, minSupport=0.5):
+    ssCnt = {}
+    for tid in D:
+        for can in Ck:
+            if can.issubset(tid):
+                if can not in ssCnt:
+                    ssCnt[can] = 1
+                else:
+                    ssCnt[can] += 1
+    retList = []
+    DataSupport = {}
+    numItems = len(D)
+    for key in ssCnt:
+        support = ssCnt[key] / numItems
+        if support >= minSupport:
+            retList.insert(len(retList), key)
+        DataSupport[key] = support
+    return retList, DataSupport
+
+
+def aprioriGen(Lk, k):
+    retList = []
+    LenLk = len(Lk)
+    for i in range(LenLk):
+        for j in range(i+1, LenLk):
+            L1 = list(Lk[i])[:k-2]
+            L2 = list(Lk[j])[:k-2]
+            L1.sort()
+            L2.sort()
+            if L1 == L2:
+                retList.append(Lk[i] | Lk[j])
+    return retList
+
+
+def apriori(dataSet, minSupport):
+    D = list(map(set, dataSet))
+    C1 = createC1(dataSet)
+    L1, SupportData = scanD(D, C1, minSupport=0.5)
+    k = 2
+    L = [L1]
+    while (len(L[k-2]) > 0):
+        Ck = aprioriGen(L[k-2], k)
+        Lk, supK = scanD(D, Ck, minSupport)
+        SupportData.update(supK)
+        L.append(Lk)
+        k += 1
+    return L, SupportData
+
+def calcConf(freqSet, H, supportData, brl, minConf=0.7):
+    prunedH = []
+    for conseq in H:
+        conf = supportData[freqSet]/supportData[freqSet-conseq]
+        if conf >= minConf:
+            brl.append((freqSet-conseq, conseq, conf))
+            prunedH.append(conseq)
+    return prunedH
+
+
+def rulesFromConseq(freqSet, H, supportData, brl, minConf=0.7):
+    m = len(H[0])
+    if len(freqSet) > m+1:
+        Hmp1 = aprioriGen(H, m+1)
+        Hmp1 = calcConf(freqSet, Hmp1, supportData, brl, minConf)
+        if len(Hmp1) > 1:
+            rulesFromConseq(freqSet, Hmp1, supportData, brl, minConf)
+
+
+def generateRules(L, supportData, minConf=0.7):
+    bigRuleList = []
+    for i in range(1, len(L)):
+        for freqSet in L[i]:
+            H1 = [frozenset([item]) for item in freqSet]
+            if i > 1:
+                rulesFromConseq(freqSet, H1, supportData, bigRuleList, minConf)
+            else:
+                calcConf(freqSet, H1, supportData, bigRuleList, minConf)
+    return bigRuleList
+
+def loadDataSet(filePath):
+    file = open(filePath)
+    retList = []
+    for line in file:
+        row = line.strip().split(" ")
+        retList.append(row)
+    return retList
+if __name__ == '__main__':
+    # target_url = "http://fimi.uantwerpen.be/data/mushroom.dat"
+    dataSet = loadDataSet(filePath="D:\\PyDataSet\mushroom.data")
+
+    L, support = apriori(dataSet, 0.3)
+
+    rules=generateRules(L, support, minConf=0.5)
+    # for trans in rules:
+    #     print(trans)
+    for item in L[1]:
+        if item.intersection('2'):
+            print(item)
+    print("-----------------------------------------------------")
+
+    for trans in rules:
+        if frozenset('2').issubset(trans[0]):
+            print(trans)
