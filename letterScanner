@@ -2,7 +2,7 @@ import numpy as np
 from numpy import *
 
 
-reserverWordList = ["iostream", "break", "case", "char", "const", "continue",
+reserverWordList = ["auto", "break", "case", "char", "const", "continue",
     "default", "do", "double", "else", "enum", "extern",
     "float", "for", "goto", "if", "int", "long",
     "register", "return", "short", "signed", "sizeof", "static",
@@ -10,9 +10,11 @@ reserverWordList = ["iostream", "break", "case", "char", "const", "continue",
     "volatile", "while"]
 
 
-operatorOrDelimiterList = ["+","-","*","/","<","<=",">",">=","=","==",
-   "!=",";","(",")","^",",",'"',"'","#","&",
-   "&&","|","||","%","~","<<",">>","[","]","{",
+operatorList = ["+","-","*","/","<","<=",">",">=","=","==",
+   "!=","^","&&","|","||","%","~","<<",">>"]
+   
+DelimiterList = [";","(",")",",",'"',"'","#","&",
+   "[","]","{",
    "}","\\",".","\?",":","!"]
 
 IDentifierList = [[]]
@@ -203,8 +205,11 @@ if __name__ == '__main__':
             print("保留字： ",reserverWordList[syn[0]-1])
         elif syn == 99:
             print("常数: ", token)
-        elif syn[0] >= 33 and syn[0] <= 68:
-            print("操作符或界符: ", operatorOrDelimiterList[syn[0]-33])
+        elif syn[0] >= 33 and syn[0] <= 43:
+            print("操作符: ", operatorList[syn[0]-33])
+        elif syn[0] >= 44 and syn[0] <= 68:
+            print("操作符: ", DelimiterList[syn[0]-33])
+
     print(len(IDentifierList))
     print("reverserWorld : ")
     print(reserverWordList)
